@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLConnection;
@@ -45,10 +46,15 @@ public final class Bootstrapper extends AbstractHandler {
     private final Mustache m = (new DefaultMustacheFactory()).compile(new StringReader(TEMPLATE_DATA), "dummy");
 
     public Bootstrapper(String[] args, @NotNull FileEncoder encoder) throws IllegalArgumentException {
-        if (args.length < 1) {
-            throw new IllegalArgumentException();
+        try {
+            final JFileChooser chooser = new JFileChooser();
+            if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) {
+                throw new IllegalArgumentException();
+            }
+            finName = chooser.getSelectedFile().getCanonicalPath();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        finName = args[0];
         foutName = (args.length >= 2) ? args[1] : null;
         if (encoder instanceof ReferenceTaskImplementation) {
             System.out.println("--> Cheaters must die! <--");
